@@ -8,16 +8,12 @@ const config: CodegenConfig = {
   documents: ['src/**/*.tsx', 'src/**/*.ts'],
   generates: {
     './src/graphql/generated-types/graphql.ts': {
-      plugins: [
-        'typescript',
-        'typescript-operations',
-        'typescript-react-apollo',
-      ],
+      plugins: ['typescript', 'typescript-operations'],
       config: {
-        withHooks: true,
-        withComponent: false,
-        withHOC: false,
-        addMutationDefaults: true,
+        skipTypename: true,
+        scalars: {
+          ID: 'string',
+        },
       },
     },
   },

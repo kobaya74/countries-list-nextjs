@@ -1,21 +1,19 @@
 'use client';
 
 import { type GetContinentsQuery } from '@/graphql/generated-types/graphql';
-import { type ApolloError } from '@apollo/client';
 import { Button, Typography } from '@youwe/component-library';
 import LoaderComponent from '@/components/utilities/LoaderComponent';
 import { useState } from 'react';
+import type { GraphQLOperationError } from '@/types/errors';
 
 interface CountryFilterProps {
   continents?: GetContinentsQuery['continents'];
   selectedContinent: string | null;
   searchTerm: string;
   loading?: boolean;
-  error?: ApolloError;
-  // eslint-disable-next-line no-unused-vars
-  onContinentChange(continent: string | null): void;
-  // eslint-disable-next-line no-unused-vars
-  onSearch(searchTerm: string): void;
+  error?: GraphQLOperationError;
+  onContinentChange(_continent: string | null): void;
+  onSearch(_searchTerm: string): void;
 }
 
 function FiltersTitle() {
@@ -138,7 +136,7 @@ export default function CountryFilter({
         <Typography as='h3' size='sm' className='mb-2 font-medium'>
           Filter by Continent
         </Typography>
-        {error?.graphQLErrors?.length && (
+        {error && (
           <Typography as='div' size='sm' className='mb-2'>
             ⚠️ Some continent data may be incomplete
           </Typography>

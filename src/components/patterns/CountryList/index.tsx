@@ -1,8 +1,8 @@
 import { type GetCountriesQuery } from '@/graphql/generated-types/graphql';
-import { type ApolloError } from '@apollo/client';
 import CountryCard from '@/components/patterns/CountryCard';
 import { Pagination, Typography } from '@youwe/component-library';
 import LoaderComponent from '@/components/utilities/LoaderComponent';
+import type { GraphQLOperationError } from '@/types/errors';
 
 interface CountryListProps {
   countries?: GetCountriesQuery['countries'];
@@ -10,9 +10,8 @@ interface CountryListProps {
   currentPage: number;
   totalPages: number;
   totalCount?: number;
-  error?: ApolloError;
-  // eslint-disable-next-line no-unused-vars
-  onPageChange(page: number): void;
+  error?: GraphQLOperationError;
+  onPageChange(_page: number): void;
 }
 
 export default function CountryList({
@@ -45,8 +44,8 @@ export default function CountryList({
               Unable to load countries
             </Typography>
             <Typography as='p' size='sm'>
-              {error.graphQLErrors?.length
-                ? error.graphQLErrors.map(err => err.message).join(', ')
+              {typeof error === 'string'
+                ? error
                 : 'An unexpected error occurred. Please try again later.'}
             </Typography>
           </div>
@@ -65,8 +64,8 @@ export default function CountryList({
 
   return (
     <div className='flex flex-col gap-6'>
-      {/* GraphQL Error Warning for partial data */}
-      {error?.graphQLErrors?.length && (
+      {/* Error Warning for partial data */}
+      {error && (
         <div className='rounded-lg border p-3'>
           <div className='text-sm'>
             <Typography as='span' size='md' className='mb-2 font-bold'>

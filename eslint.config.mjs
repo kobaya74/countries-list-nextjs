@@ -15,10 +15,10 @@ const compat = new FlatCompat({
 const config = [
   // Base JS recommended rules
   js.configs.recommended,
-  
+
   // Next.js and TypeScript integration
   ...compat.extends('next/core-web-vitals'),
-  
+
   // Custom settings
   {
     languageOptions: {
@@ -39,12 +39,21 @@ const config = [
     rules: {
       // Add custom rules here
       'no-console': ['warn', { allow: ['warn', 'error'] }],
+      // Allow unused parameters with underscore prefix
+      'no-unused-vars': [
+        'error',
+        {
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+          caughtErrorsIgnorePattern: '^_',
+        },
+      ],
     },
   },
-  
+
   // Prettier integration (must be last to override other configs)
   prettierConfig,
-  
+
   // Ignore patterns
   {
     ignores: [

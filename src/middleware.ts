@@ -2,8 +2,7 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 // Keeping this here for reference, but not using it for now
-// eslint-disable-next-line no-unused-vars
-export function middleware(request: NextRequest) {
+export function middleware(_request: NextRequest) {
   const response = NextResponse.next({});
 
   // Set a new response header `x-react-learning-track`

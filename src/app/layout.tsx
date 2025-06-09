@@ -6,7 +6,6 @@ import '@youwe/component-library/styles/variables/core.css';
 import '@youwe/component-library/styles/variables/responsive.css';
 import '@youwe/component-library/styles/globals.css';
 import '@youwe/component-library/styles/motion.css';
-import { ApolloWrapper } from '@/lib/apollo';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -40,9 +39,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} flex flex-col font-sans antialiased`}
       >
-        <div className='flex flex-grow flex-col'>
-          <ApolloWrapper>{children}</ApolloWrapper>
-        </div>
+        <div className='flex flex-grow flex-col'>{children}</div>
       </body>
     </html>
   );

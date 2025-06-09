@@ -2,38 +2,51 @@
 
 import {
   type GetCountriesQuery,
-  useGetCountryDetailsLazyQuery,
+  type GetCountryDetailsQuery,
 } from '@/graphql/generated-types/graphql';
 import { useState } from 'react';
-import { useMutation } from '@apollo/client';
-import { TRACK_COUNTRY_VIEW } from '@/graphql/mutations/index';
+import { useGraphqlLazyQuery } from '@/hooks/useGraphqlLazyQuery';
+import { useGraphqlMutation } from '@/hooks/useGraphqlMutation';
+import { GET_COUNTRY_DETAILS } from '@/graphql/queries';
+import { TRACK_COUNTRY_VIEW } from '@/graphql/mutations';
 import LoaderComponent from '@/components/utilities/LoaderComponent';
 import { Typography } from '@youwe/component-library';
+import { hasErrorMessage } from '@/types/errors';
 
 type CountryCardProps = {
   country: GetCountriesQuery['countries'][0];
 };
 
+interface TrackCountryViewResponse {
+  trackCountryView: {
+    success: boolean;
+    message: string;
+  };
+}
+
 export default function CountryCard({ country }: CountryCardProps) {
   const [isFlipped, setIsFlipped] = useState(false);
   const [isDetailsFetched, setIsDetailsFetched] = useState(false);
 
-  // Query for fetching detailed data with enhanced error handling
+  // Use our custom Apollo-like lazy query hook with company's single GraphQL requests
   const [
     fetchDetails,
     { loading: detailsLoading, error: detailsError, data: detailsData },
-  ] = useGetCountryDetailsLazyQuery({
+  ] = useGraphqlLazyQuery<GetCountryDetailsQuery>(GET_COUNTRY_DETAILS, {
     errorPolicy: 'all', // Show partial data even if some fields fail
-  });
-
-  // Tracking mutation with enhanced error handling
-  const [trackCountryView] = useMutation(TRACK_COUNTRY_VIEW, {
-    errorPolicy: 'all', // Continue even if tracking fails
-    onError: error => {
-      console.error('Tracking error:', error);
-      // Don't show user-facing error for tracking failures
+    next: {
+      revalidate: 3600, // Cache for 1 hour using Next.js fetch options
+      tags: [`country-details-${country.code}`],
     },
   });
+
+  // Use our custom Apollo-like mutation hook for tracking
+  const [trackCountryView] = useGraphqlMutation<TrackCountryViewResponse>(
+    TRACK_COUNTRY_VIEW,
+    {
+      errorPolicy: 'none', // Don't show user-facing errors for tracking failures
+    },
+  );
 
   const handleFlip = () => {
     const newState = !isFlipped;
@@ -58,18 +71,22 @@ export default function CountryCard({ country }: CountryCardProps) {
   };
 
   const renderDetailErrors = () => {
-    if (!detailsError?.graphQLErrors?.length) return null;
+    if (!detailsError) return null;
+
+    // Extract error message safely
+    const errorMessage =
+      typeof detailsError === 'string'
+        ? detailsError
+        : hasErrorMessage(detailsError)
+          ? detailsError.message
+          : 'An error occurred while loading details';
 
     return (
       <div className='rounded mb-2 p-2'>
         <Typography as='span' size='md' className='mb-2 font-bold'>
           ⚠️ Some details unavailable:
         </Typography>
-        <ul className='mt-1 list-inside list-disc'>
-          {detailsError.graphQLErrors.map((error, i) => (
-            <li key={i}>{error.message}</li>
-          ))}
-        </ul>
+        <p className='mt-1 text-xs'>{errorMessage}</p>
       </div>
     );
   };
@@ -135,9 +152,11 @@ export default function CountryCard({ country }: CountryCardProps) {
                 Unable to load detailed information
               </Typography>
               <p className='text-xs'>
-                {detailsError.graphQLErrors?.length
-                  ? detailsError.graphQLErrors[0].message
-                  : 'Please try again later.'}
+                {typeof detailsError === 'string'
+                  ? detailsError
+                  : hasErrorMessage(detailsError)
+                    ? detailsError.message
+                    : 'An error occurred while loading details'}
               </p>
             </div>
           )}
@@ -153,12 +172,6 @@ export default function CountryCard({ country }: CountryCardProps) {
                   </Typography>
                   <Typography as='p' size='sm' className='font-medium'>
                     Currency: {country.currency || 'N/A'}
-                  </Typography>
-                  <Typography as='p' size='sm' className='font-medium'>
-                    Continent: {country.continent.name}
-                  </Typography>
-                  <Typography as='p' size='sm' className='font-medium'>
-                    Phone: {detailsData?.country?.phone || 'N/A'}
                   </Typography>
                   <Typography as='p' size='sm' className='font-medium'>
                     Continent: {country.continent.name}

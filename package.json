@@ -16,11 +16,10 @@
     "generate:schema:watch": "graphql-codegen --watch"
   },
   "dependencies": {
-    "@apollo/client": "^3.13.8",
-    "@apollo/client-integration-nextjs": "^0.12.2",
-    "@graphql-tools/schema": "^10.0.23",
     "@youwe/component-library": "^3.2.0",
     "graphql": "^16.11.0",
+    "graphql-request": "^7.2.0",
+    "graphql-tag": "^2.12.6",
     "next": "^15.3.3",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",

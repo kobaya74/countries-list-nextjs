@@ -1,4 +1,4 @@
-import { gql } from '@apollo/client';
+import { gql } from 'graphql-tag';
 
 // Basic countries data for homepage list
 export const GET_COUNTRIES = gql`

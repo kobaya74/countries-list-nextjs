@@ -1,4 +1,4 @@
-import { gql } from '@apollo/client';
+import { gql } from 'graphql-tag';
 
 export const TRACK_COUNTRY_VIEW = gql`
   mutation TrackCountryView($countryCode: String!, $action: String!) {

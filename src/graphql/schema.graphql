@@ -10,4 +10,4 @@ type Query {
 
 type Mutation {
   trackCountryView(countryCode: String!, action: String!): TrackingResponse
-} 
+}

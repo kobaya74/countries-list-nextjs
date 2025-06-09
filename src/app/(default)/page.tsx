@@ -2,12 +2,13 @@ import Homepage from '@/features/homepage';
 import type { Metadata } from 'next';
 import { Suspense } from 'react';
 import LoaderPage from '@/components/utilities/LoaderPage';
-import { getServerApolloClient } from '@/lib/apollo-server';
+import batchedGraphqlRequest from '@/lib/graphql/batchedGraphqlRequest';
 import { GET_COUNTRIES, GET_CONTINENTS } from '@/graphql/queries';
 import type {
   GetCountriesQuery,
   GetContinentsQuery,
 } from '@/graphql/generated-types/graphql';
+import { print } from 'graphql';
 
 export const metadata: Metadata = {
   title: 'Next.js Assignment - Home',
@@ -15,32 +16,29 @@ export const metadata: Metadata = {
     'A Next.js project with TypeScript, Yarn, and the Youwe Component Library',
 };
 
-// Server component that fetches initial data
+// Server component that fetches initial data using company's batched approach
 async function fetchInitialData() {
-  const client = getServerApolloClient();
-
   try {
-    // Fetch both countries and continents in parallel
+    // Use batched requests for critical rendering data as per company policy
+    // Both queries are critical for initial page render, so we use 'critical' queue
     const [countriesResult, continentsResult] = await Promise.allSettled([
-      client.query<GetCountriesQuery>({
-        query: GET_COUNTRIES,
-        errorPolicy: 'all',
-      }),
-      client.query<GetContinentsQuery>({
-        query: GET_CONTINENTS,
-        errorPolicy: 'all',
-      }),
+      batchedGraphqlRequest<GetCountriesQuery>(
+        print(GET_COUNTRIES), // Convert DocumentNode to string
+        {},
+        'critical', // Critical queue for initial page data
+      ),
+      batchedGraphqlRequest<GetContinentsQuery>(
+        print(GET_CONTINENTS), // Convert DocumentNode to string
+        {},
+        'critical', // Critical queue for initial page data
+      ),
     ]);
 
     return {
       countries:
-        countriesResult.status === 'fulfilled'
-          ? countriesResult.value.data
-          : null,
+        countriesResult.status === 'fulfilled' ? countriesResult.value : null,
       continents:
-        continentsResult.status === 'fulfilled'
-          ? continentsResult.value.data
-          : null,
+        continentsResult.status === 'fulfilled' ? continentsResult.value : null,
       countriesError:
         countriesResult.status === 'rejected' ? countriesResult.reason : null,
       continentsError:
@@ -58,7 +56,7 @@ async function fetchInitialData() {
 }
 
 export default async function Home() {
-  // Fetch initial data on the server
+  // Fetch initial data on the server using company's batched approach
   const initialData = await fetchInitialData();
 
   return (

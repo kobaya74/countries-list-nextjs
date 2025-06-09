@@ -1,23 +1,25 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import {
-  useGetCountriesQuery,
-  useGetContinentsQuery,
-  type GetCountriesQuery,
-  type GetContinentsQuery,
+import type {
+  GetCountriesQuery,
+  GetContinentsQuery,
 } from '@/graphql/generated-types/graphql';
+import { useGraphqlQuery } from '@/hooks/useGraphqlQuery';
+import { GET_COUNTRIES, GET_CONTINENTS } from '@/graphql/queries';
 import CountryFilter from '@/components/patterns/CountryFilter';
 import CountryList from '@/components/patterns/CountryList';
 import { Typography } from '@youwe/component-library';
 
 const ITEMS_PER_PAGE = 12;
 
+import type { GraphQLOperationError } from '@/types/errors';
+
 interface HomepageProps {
   initialCountries?: GetCountriesQuery | null;
   initialContinents?: GetContinentsQuery | null;
-  initialCountriesError?: any;
-  initialContinentsError?: any;
+  initialCountriesError?: GraphQLOperationError;
+  initialContinentsError?: GraphQLOperationError;
 }
 
 export default function Homepage({
@@ -32,26 +34,36 @@ export default function Homepage({
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
 
-  // Use Apollo queries with initial data from server
+  // Use our custom Apollo-like hooks with company's batched GraphQL requests
   const {
     loading: continentsLoading,
     error: continentsError,
     data: continentsData,
-  } = useGetContinentsQuery({
-    errorPolicy: 'all',
-    // If we have initial data, use it and skip the initial network request
-    skip: !!initialContinents,
-  });
+  } = useGraphqlQuery<GetContinentsQuery>(
+    GET_CONTINENTS,
+    {},
+    {
+      skip: !!initialContinents, // Skip if we have initial data from server
+      queue: 'general', // Use general queue for client-side requests
+      errorPolicy: 'all',
+      initialError: initialContinentsError, // Pass SSR error for rate limit detection
+    },
+  );
 
   const {
     loading: countriesLoading,
     error: countriesError,
     data: countriesData,
-  } = useGetCountriesQuery({
-    errorPolicy: 'all',
-    // If we have initial data, use it and skip the initial network request
-    skip: !!initialCountries,
-  });
+  } = useGraphqlQuery<GetCountriesQuery>(
+    GET_COUNTRIES,
+    {},
+    {
+      skip: !!initialCountries, // Skip if we have initial data from server
+      queue: 'general', // Use general queue for client-side requests
+      errorPolicy: 'all',
+      initialError: initialCountriesError, // Pass SSR error for rate limit detection
+    },
+  );
 
   // Use server data if available, otherwise fall back to client data
   const effectiveContinentsData = initialContinents || continentsData;
