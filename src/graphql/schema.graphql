@@ -1,0 +1,13 @@
+type TrackingResponse {
+  success: Boolean!
+  message: String
+}
+
+# Need to define a Query type even if we don't use it locally
+type Query {
+  _dummy: String
+}
+
+type Mutation {
+  trackCountryView(countryCode: String!, action: String!): TrackingResponse
+} 
