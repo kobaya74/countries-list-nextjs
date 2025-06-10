@@ -36,7 +36,7 @@ const resolvers = {
   },
   Mutation: {
     trackCountryView: (
-      _: any,
+      _: unknown,
       { countryCode, action }: { countryCode: string; action: string },
     ) => {
       // TODO: Implement tracking

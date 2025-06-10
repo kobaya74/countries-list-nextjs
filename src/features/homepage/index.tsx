@@ -7,6 +7,7 @@ import {
   type GetCountriesQuery,
   type GetContinentsQuery,
 } from '@/graphql/generated-types/graphql';
+import { type ApolloError } from '@apollo/client';
 import CountryFilter from '@/components/patterns/CountryFilter';
 import CountryList from '@/components/patterns/CountryList';
 import { Typography } from '@youwe/component-library';
@@ -16,8 +17,8 @@ const ITEMS_PER_PAGE = 12;
 interface HomepageProps {
   initialCountries?: GetCountriesQuery | null;
   initialContinents?: GetContinentsQuery | null;
-  initialCountriesError?: any;
-  initialContinentsError?: any;
+  initialCountriesError?: ApolloError;
+  initialContinentsError?: ApolloError;
 }
 
 export default function Homepage({
